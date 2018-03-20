@@ -1,16 +1,25 @@
-"""
-Simple "Hello, World" application using Flask
-"""
+from flask import Flask, render_template, request
 
-from flask import Flask
-app = Flask(__name__)
+from src.mbta_helper import find_stop_near
 
-app.config['DEBUG'] = True
+app = Flask(__name__) #COPY
 
+app.config['DEBUG'] = True #THIS
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+app.secret_key = "Some secret string here" #FOR WEBSITE CODE
+
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/mbta/', methods=['GET', 'POST'])
+def calculate():
+    if request.method == 'POST':
+        location = request.form['a']
+        stop, dist = find_stop_near(location)
+        if stop:
+            return render_template('MBTA_result.html', a=location,
+                                   s=stop, d=dist)
+        else:
+            return render_template('MBTA_form.html')
+    return render_template('MBTA_form.html')
 
 if __name__ == '__main__':
     app.run()
